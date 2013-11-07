@@ -1,7 +1,7 @@
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
-QT += core gui gui-private
+QT += core gui
 !build_gifimage_lib:DEFINES += GIFIMAGE_NO_LIB
 
 include($$PWD/../3rdParty/giflib.pri)

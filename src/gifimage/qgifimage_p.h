@@ -28,11 +28,24 @@
 #include "qgifimage.h"
 #include "gif_lib.h"
 
+#include <QVector>
+#include <QColor>
+
 class QGifImagePrivate
 {
     Q_DECLARE_PUBLIC(QGifImage)
 public:
     QGifImagePrivate(QGifImage *p);
+    ~QGifImagePrivate();
+    bool load(QIODevice *device);
+    bool save(QIODevice *device);
+    QVector<QRgb> colorTableFromColorMapObject(ColorMapObject *object, int transColorIndex=-1);
+
+    int canvasWidth;
+    int canvasHeight;
+    int delayTime;
+    QVector<QRgb> globalColorTable;
+    QList<QImage> frames;
 
     QGifImage *q_ptr;
 };

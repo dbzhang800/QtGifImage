@@ -26,17 +26,28 @@
 #define QGIFIMAGE_H
 
 #include "qgifglobal.h"
-#include <QVariant>
+#include <QImage>
+#include <QList>
 
 class QGifImagePrivate;
-
 class Q_GIFIMAGE_EXPORT QGifImage
 {
     Q_DECLARE_PRIVATE(QGifImage)
 public:
     QGifImage();
+    QGifImage(QIODevice *device);
+    QGifImage(const QString &fileName);
     ~QGifImage();
 
+    int frameCount() const;
+    QList<QImage> frames() const;
+
+    bool load(QIODevice *device);
+    bool load(const QString &fileName);
+    bool save(QIODevice *device) const;
+    bool save(const QString &fileName) const;
+
+private:
     QGifImagePrivate * const d_ptr;
 };
 
