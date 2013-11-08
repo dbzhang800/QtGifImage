@@ -31,6 +31,20 @@
 #include <QVector>
 #include <QColor>
 
+class FrameInfoData
+{
+public:
+    FrameInfoData()
+        :delayTime(-1), interlace(false)
+    {
+
+    }
+    QPoint offset; //offset info of QImage will lost when convert from One format to another.
+    int delayTime;
+    bool interlace;
+    QColor transparentColor;
+};
+
 class QGifImagePrivate
 {
     Q_DECLARE_PUBLIC(QGifImage)
@@ -38,14 +52,17 @@ public:
     QGifImagePrivate(QGifImage *p);
     ~QGifImagePrivate();
     bool load(QIODevice *device);
-    bool save(QIODevice *device);
-    QVector<QRgb> colorTableFromColorMapObject(ColorMapObject *object, int transColorIndex=-1);
+    bool save(QIODevice *device) const;
+    QVector<QRgb> colorTableFromColorMapObject(ColorMapObject *object, int transColorIndex=-1) const;
+    ColorMapObject * colorTableToColorMapObject(QVector<QRgb> colorTable) const;
+    QSize getCanvasSize() const;
 
-    int canvasWidth;
-    int canvasHeight;
-    int delayTime;
+    QSize canvasSize;
+    int defaultDelayTime;
+
     QVector<QRgb> globalColorTable;
     QList<QImage> frames;
+    QList<FrameInfoData> frameInfos;
 
     QGifImage *q_ptr;
 };

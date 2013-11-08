@@ -43,7 +43,7 @@ int readFromIODevice(GifFileType *gifFile, GifByteType *data, int maxSize)
 }
 
 QGifImagePrivate::QGifImagePrivate(QGifImage *p)
-    :canvasWidth(-1), canvasHeight(-1), delayTime(0), q_ptr(p)
+    : defaultDelayTime(-1), q_ptr(p)
 {
 
 }
@@ -53,7 +53,7 @@ QGifImagePrivate::~QGifImagePrivate()
 
 }
 
-QVector<QRgb> QGifImagePrivate::colorTableFromColorMapObject(ColorMapObject *colorMap, int transColorIndex)
+QVector<QRgb> QGifImagePrivate::colorTableFromColorMapObject(ColorMapObject *colorMap, int transColorIndex) const
 {
     QVector<QRgb> colorTable;
     if (colorMap) {
@@ -69,20 +69,66 @@ QVector<QRgb> QGifImagePrivate::colorTableFromColorMapObject(ColorMapObject *col
     return colorTable;
 }
 
+ColorMapObject *QGifImagePrivate::colorTableToColorMapObject(QVector<QRgb> colorTable) const
+{
+    if (colorTable.isEmpty())
+        return 0;
+
+    ColorMapObject *cmap = (ColorMapObject *)malloc(sizeof(ColorMapObject));
+    // num of colors must be a power of 2
+    int numColors = 1 << GifBitSize(colorTable.size());
+    cmap->ColorCount = numColors;
+    //Maybe a bug of giflib, BitsPerPixel is used as size of the color table size.
+    cmap->BitsPerPixel = GifBitSize(colorTable.size()); //Todo!
+    cmap->SortFlag = false;
+
+    GifColorType* colorValues = (GifColorType*)calloc(numColors, sizeof(GifColorType));
+    for(int idx=0; idx < colorTable.size(); ++idx) {
+        colorValues[idx].Red = qRed(colorTable[idx]);
+        colorValues[idx].Green = qGreen(colorTable[idx]);
+        colorValues[idx].Blue = qBlue(colorTable[idx]);
+    }
+
+    cmap->Colors = colorValues;
+
+    return cmap;
+}
+
+QSize QGifImagePrivate::getCanvasSize() const
+{
+    //If canvasSize has been set by user.
+    if (canvasSize.isValid())
+        return canvasSize;
+
+    //Calc the right canvasSize from the frame size.
+    int width = -1;
+    int height = -1;
+    foreach (QImage img, frames) {
+        int w = img.width() + img.offset().x();
+        int h = img.height() + img.offset().y();
+        if (w > width) width = w;
+        if (h > height) height = h;
+    }
+    return QSize(width, height);
+}
+
 bool QGifImagePrivate::load(QIODevice *device)
 {
     static int interlacedOffset[] = { 0, 4, 2, 1 }; /* The way Interlaced image should. */
     static int interlacedJumps[] = { 8, 8, 4, 2 };    /* be read - offsets and jumps... */
 
-    GifFileType *gifFile = DGifOpen(device, readFromIODevice, 0);
-    if (!gifFile)
+    int error;
+    GifFileType *gifFile = DGifOpen(device, readFromIODevice, &error);
+    if (!gifFile) {
+        qWarning(GifErrorString(error));
         return false;
+    }
 
     if (DGifSlurp(gifFile) == GIF_ERROR)
         return false;
 
-    canvasWidth = gifFile->SWidth;
-    canvasHeight = gifFile->SHeight;
+    canvasSize.setWidth(gifFile->SWidth);
+    canvasSize.setHeight(gifFile->SHeight);
     QColor backgroundColor;
     if (gifFile->SColorMap) {
         globalColorTable = colorTableFromColorMapObject(gifFile->SColorMap);
@@ -96,9 +142,10 @@ bool QGifImagePrivate::load(QIODevice *device)
         int width = gifImage.ImageDesc.Width;
         int height = gifImage.ImageDesc.Height;
 
-        QScopedPointer<GraphicsControlBlock> gcb(new GraphicsControlBlock);
-        DGifSavedExtensionToGCB(gifFile, idx, gcb.data());
-        int transColorIndex = gcb->TransparentColor;
+        FrameInfoData frameInfo;
+        GraphicsControlBlock gcb;
+        DGifSavedExtensionToGCB(gifFile, idx, &gcb);
+        int transColorIndex = gcb.TransparentColor;
 
         QVector<QRgb> colorTable;
         if (gifImage.ImageDesc.ColorMap)
@@ -108,8 +155,14 @@ bool QGifImagePrivate::load(QIODevice *device)
         else
             colorTable = globalColorTable;
 
+        if (transColorIndex != -1)
+            frameInfo.transparentColor = colorTable[transColorIndex];
+        frameInfo.delayTime = gcb.DelayTime;
+        frameInfo.interlace = gifImage.ImageDesc.Interlace;
+        frameInfo.offset = QPoint(left, top);
+
         QImage image(width, height, QImage::Format_Indexed8);
-        image.setOffset(QPoint(left, top));
+        image.setOffset(QPoint(left, top)); //Maybe useful for some users.
         image.setColorTable(colorTable);
         if (transColorIndex != -1)
             image.fill(transColorIndex);
@@ -130,7 +183,6 @@ bool QGifImagePrivate::load(QIODevice *device)
             }
         }
 
-
         //Extract other data for the image.
 //        for (int i=0; i<gifImage->ExtensionBlockCount; ++i) {
 //            ExtensionBlock *extBlock = gifImage->ExtensionBlocks[i];
@@ -139,14 +191,88 @@ bool QGifImagePrivate::load(QIODevice *device)
 //        }
 
         frames.append(image);
+        frameInfos.append(frameInfo);
     }
 
     DGifCloseFile(gifFile);
+    return true;
 }
 
-bool QGifImagePrivate::save(QIODevice *device)
+bool QGifImagePrivate::save(QIODevice *device) const
 {
-    return false;
+    int error;
+    GifFileType *gifFile = EGifOpen(device, writeToIODevice, &error);
+    if (!gifFile) {
+        qWarning(GifErrorString(error));
+        return false;
+    }
+
+    QSize _canvasSize = getCanvasSize();
+    gifFile->SWidth = _canvasSize.width();
+    gifFile->SHeight = _canvasSize.height();
+    gifFile->SColorResolution = 8;
+    if (!globalColorTable.isEmpty()) {
+        gifFile->SColorMap = colorTableToColorMapObject(globalColorTable);
+        //gifFile->SBackGroundColor =
+    }
+
+    gifFile->ImageCount = frames.size();
+    gifFile->SavedImages = (SavedImage *)calloc(frames.size(), sizeof(SavedImage));
+    for (int idx=0; idx < frames.size(); ++idx) {
+        QImage image = frames.at(idx);
+        const FrameInfoData frameInfo = frameInfos.at(idx);
+        if (image.format() != QImage::Format_Indexed8) {
+            if (!globalColorTable.isEmpty())
+                image = image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
+            else
+                image = image.convertToFormat(QImage::Format_Indexed8);
+        }
+
+        SavedImage *gifImage = gifFile->SavedImages + idx;
+
+        gifImage->ImageDesc.Left = frameInfo.offset.x();
+        gifImage->ImageDesc.Top = frameInfo.offset.y();
+        gifImage->ImageDesc.Width = image.width();
+        gifImage->ImageDesc.Height = image.height();
+        gifImage->ImageDesc.Interlace = frameInfo.interlace;
+
+        if (!image.colorTable().isEmpty() && (image.colorTable() != globalColorTable))
+            gifImage->ImageDesc.ColorMap = colorTableToColorMapObject(image.colorTable());
+        else
+            gifImage->ImageDesc.ColorMap = 0;
+
+        GifByteType *data = (GifByteType *)malloc(image.width() * image.height() * sizeof(GifByteType));
+        for (int row=0; row<image.height(); ++row) {
+            memcpy(data+row*image.width(), image.scanLine(row), image.width());
+        }
+        gifImage->RasterBits = data;
+
+        GraphicsControlBlock gcbBlock;
+        gcbBlock.DisposalMode = 0;
+        gcbBlock.UserInputFlag = false;
+        int index = -1;
+        if (frameInfo.transparentColor.isValid()) {
+            if (!image.colorTable().isEmpty())
+                index = image.colorTable().indexOf(frameInfo.transparentColor.rgba());
+            else if (!globalColorTable.isEmpty())
+                index = globalColorTable.indexOf(frameInfo.transparentColor.rgba());
+        }
+        gcbBlock.TransparentColor = index;
+
+        if (frameInfo.delayTime != -1)
+            gcbBlock.DelayTime = frameInfo.delayTime;
+        else if (defaultDelayTime != -1)
+            gcbBlock.DelayTime = defaultDelayTime;
+        else
+            gcbBlock.DelayTime = 0;
+
+        EGifGCBToSavedExtension(&gcbBlock, gifFile, idx);
+    }
+
+    EGifSpew(gifFile);
+    //EGifCloseFile(gifFile);
+
+    return true;
 }
 
 
@@ -175,11 +301,45 @@ QGifImage::QGifImage(const QString &fileName)
 }
 
 /*!
+    Constructs a gif image
+*/
+QGifImage::QGifImage(const QSize &size)
+    :d_ptr(new QGifImagePrivate(this))
+{
+    d_ptr->canvasSize = size;
+}
+
+/*!
     Destroys the gif image and cleans up.
 */
 QGifImage::~QGifImage()
 {
     delete d_ptr;
+}
+
+void QGifImage::setGlobalColorTable(QVector<QRgb> colors)
+{
+    Q_D(QGifImage);
+    d->globalColorTable = colors;
+}
+
+void QGifImage::setDefaultDelayTime(int internal)
+{
+    Q_D(QGifImage);
+    d->defaultDelayTime = internal;
+}
+
+bool QGifImage::addFrame(const QImage &frame, int delayTime)
+{
+    Q_D(QGifImage);
+
+    FrameInfoData data;
+    data.delayTime = delayTime;
+    data.offset = frame.offset();
+
+    d->frames.append(frame);
+    d->frameInfos.append(data);
+    return true;
 }
 
 int QGifImage::frameCount() const
@@ -201,6 +361,11 @@ QList<QImage> QGifImage::frames() const
 */
 bool QGifImage::save(const QString &fileName) const
 {
+    Q_D(const QGifImage);
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly))
+        return d->save(&file);
+
     return false;
 }
 
@@ -211,6 +376,10 @@ bool QGifImage::save(const QString &fileName) const
 */
 bool QGifImage::save(QIODevice *device) const
 {
+    Q_D(const QGifImage);
+    if (device->openMode() | QIODevice::WriteOnly)
+        return d->save(device);
+
     return false;
 }
 

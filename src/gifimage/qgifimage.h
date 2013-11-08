@@ -28,6 +28,7 @@
 #include "qgifglobal.h"
 #include <QImage>
 #include <QList>
+#include <QVector>
 
 class QGifImagePrivate;
 class Q_GIFIMAGE_EXPORT QGifImage
@@ -37,7 +38,12 @@ public:
     QGifImage();
     QGifImage(QIODevice *device);
     QGifImage(const QString &fileName);
+    QGifImage(const QSize &size);
     ~QGifImage();
+
+    void setGlobalColorTable(QVector<QRgb> colors);
+    void setDefaultDelayTime(int internal);
+    bool addFrame(const QImage &frame, int delayTime=-1);
 
     int frameCount() const;
     QList<QImage> frames() const;
