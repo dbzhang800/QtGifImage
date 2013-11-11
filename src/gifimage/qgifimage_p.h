@@ -39,6 +39,7 @@ public:
     {
 
     }
+    QImage image;
     QPoint offset; //offset info of QImage will lost when convert from One format to another.
     int delayTime;
     bool interlace;
@@ -59,9 +60,10 @@ public:
 
     QSize canvasSize;
     int defaultDelayTime;
+    QColor defaultTransparentColor;
 
     QVector<QRgb> globalColorTable;
-    QList<QImage> frames;
+    QColor bgColor;
     QList<FrameInfoData> frameInfos;
 
     QGifImage *q_ptr;

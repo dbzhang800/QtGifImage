@@ -27,6 +27,7 @@
 
 #include "qgifglobal.h"
 #include <QImage>
+#include <QColor>
 #include <QList>
 #include <QVector>
 
@@ -41,12 +42,28 @@ public:
     QGifImage(const QSize &size);
     ~QGifImage();
 
-    void setGlobalColorTable(QVector<QRgb> colors);
-    void setDefaultDelayTime(int internal);
-    bool addFrame(const QImage &frame, int delayTime=-1);
+    QVector<QRgb> globalColorTable() const;
+    QColor backgroundColor() const;
+    void setGlobalColorTable(const QVector<QRgb> &colors, const QColor &bgColor = QColor());
+    int defaultDelay() const;
+    void setDefaultDelay(int internal);
+    QColor defaultTransparentColor() const;
+    void setDefaultTransparentColor(const QColor &color);
 
     int frameCount() const;
-    QList<QImage> frames() const;
+    QImage frame(int index) const;
+
+    void addFrame(const QImage &frame, int delay=-1);
+    void addFrame(const QImage &frame, const QPoint &offset, int delay=-1);
+    void insertFrame(int index, const QImage &frame, int delay=-1);
+    void insertFrame(int index, const QImage &frame, const QPoint &offset, int delay=-1);
+
+    QPoint frameOffset(int index) const;
+    void setFrameOffset(int index, const QPoint &offset);
+    int frameDelay(int index) const;
+    void setFrameDelay(int index, int delay);
+    QColor frameTransparentColor(int index) const;
+    void setFrameTransparentColor(int index, const QColor &color);
 
     bool load(QIODevice *device);
     bool load(const QString &fileName);

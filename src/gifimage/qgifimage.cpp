@@ -43,7 +43,7 @@ int readFromIODevice(GifFileType *gifFile, GifByteType *data, int maxSize)
 }
 
 QGifImagePrivate::QGifImagePrivate(QGifImage *p)
-    : defaultDelayTime(-1), q_ptr(p)
+    : defaultDelayTime(1000), q_ptr(p)
 {
 
 }
@@ -103,9 +103,9 @@ QSize QGifImagePrivate::getCanvasSize() const
     //Calc the right canvasSize from the frame size.
     int width = -1;
     int height = -1;
-    foreach (QImage img, frames) {
-        int w = img.width() + img.offset().x();
-        int h = img.height() + img.offset().y();
+    foreach (FrameInfoData info, frameInfos) {
+        int w = info.image.width() + info.offset.x();
+        int h = info.image.height() + info.offset.y();
         if (w > width) width = w;
         if (h > height) height = h;
     }
@@ -129,10 +129,10 @@ bool QGifImagePrivate::load(QIODevice *device)
 
     canvasSize.setWidth(gifFile->SWidth);
     canvasSize.setHeight(gifFile->SHeight);
-    QColor backgroundColor;
     if (gifFile->SColorMap) {
         globalColorTable = colorTableFromColorMapObject(gifFile->SColorMap);
-        backgroundColor = globalColorTable[gifFile->SBackGroundColor];
+        if (gifFile->SBackGroundColor < globalColorTable.size())
+            bgColor = QColor(globalColorTable[gifFile->SBackGroundColor]);
     }
 
     for (int idx=0; idx<gifFile->ImageCount; ++idx) {
@@ -157,7 +157,7 @@ bool QGifImagePrivate::load(QIODevice *device)
 
         if (transColorIndex != -1)
             frameInfo.transparentColor = colorTable[transColorIndex];
-        frameInfo.delayTime = gcb.DelayTime;
+        frameInfo.delayTime = gcb.DelayTime * 10; //convert to milliseconds
         frameInfo.interlace = gifImage.ImageDesc.Interlace;
         frameInfo.offset = QPoint(left, top);
 
@@ -189,8 +189,7 @@ bool QGifImagePrivate::load(QIODevice *device)
 //            if (extBlock->Function == GRAPHICS_EXT_FUNC_CODE) {
 //            }
 //        }
-
-        frames.append(image);
+        frameInfo.image = image;
         frameInfos.append(frameInfo);
     }
 
@@ -213,19 +212,20 @@ bool QGifImagePrivate::save(QIODevice *device) const
     gifFile->SColorResolution = 8;
     if (!globalColorTable.isEmpty()) {
         gifFile->SColorMap = colorTableToColorMapObject(globalColorTable);
-        //gifFile->SBackGroundColor =
+        int idx = globalColorTable.indexOf(bgColor.rgba());
+        gifFile->SBackGroundColor = idx == -1 ? 0 : idx;
     }
 
-    gifFile->ImageCount = frames.size();
-    gifFile->SavedImages = (SavedImage *)calloc(frames.size(), sizeof(SavedImage));
-    for (int idx=0; idx < frames.size(); ++idx) {
-        QImage image = frames.at(idx);
+    gifFile->ImageCount = frameInfos.size();
+    gifFile->SavedImages = (SavedImage *)calloc(frameInfos.size(), sizeof(SavedImage));
+    for (int idx=0; idx < frameInfos.size(); ++idx) {
         const FrameInfoData frameInfo = frameInfos.at(idx);
+        QImage image = frameInfo.image;
         if (image.format() != QImage::Format_Indexed8) {
-            if (!globalColorTable.isEmpty())
-                image = image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
-            else
-                image = image.convertToFormat(QImage::Format_Indexed8);
+//            if (!globalColorTable.isEmpty())
+//                image = image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
+//            else
+            image = image.convertToFormat(QImage::Format_Indexed8);
         }
 
         SavedImage *gifImage = gifFile->SavedImages + idx;
@@ -260,11 +260,9 @@ bool QGifImagePrivate::save(QIODevice *device) const
         gcbBlock.TransparentColor = index;
 
         if (frameInfo.delayTime != -1)
-            gcbBlock.DelayTime = frameInfo.delayTime;
-        else if (defaultDelayTime != -1)
-            gcbBlock.DelayTime = defaultDelayTime;
+            gcbBlock.DelayTime = frameInfo.delayTime / 10; //convert from milliseconds
         else
-            gcbBlock.DelayTime = 0;
+            gcbBlock.DelayTime = defaultDelayTime / 10;
 
         EGifGCBToSavedExtension(&gcbBlock, gifFile, idx);
     }
@@ -317,41 +315,194 @@ QGifImage::~QGifImage()
     delete d_ptr;
 }
 
-void QGifImage::setGlobalColorTable(QVector<QRgb> colors)
+/*!
+    Return global color table.
+ */
+QVector<QRgb> QGifImage::globalColorTable() const
+{
+    Q_D(const QGifImage);
+    return d->globalColorTable;
+}
+
+/*!
+    Return background color of the gif canvas. It only makes sense when
+    global color table is not empty.
+ */
+QColor QGifImage::backgroundColor() const
+{
+    Q_D(const QGifImage);
+    return d->bgColor;
+}
+
+/*!
+    Set the global color table \a colors and background color \a bgColor.
+    \a bgColor must be one the color in \a colors.
+ */
+void QGifImage::setGlobalColorTable(const QVector<QRgb> &colors, const QColor &bgColor)
 {
     Q_D(QGifImage);
     d->globalColorTable = colors;
+    d->bgColor = bgColor;
 }
 
-void QGifImage::setDefaultDelayTime(int internal)
+/*!
+    Return the default delay in milliseconds. The default value is 1000 ms.
+
+    The time delay can be different for every frame.
+*/
+int QGifImage::defaultDelay() const
+{
+    Q_D(const QGifImage);
+    return d->defaultDelayTime;
+}
+
+/*!
+    Set the default \a delay in milliseconds.
+*/
+void QGifImage::setDefaultDelay(int delay)
 {
     Q_D(QGifImage);
-    d->defaultDelayTime = internal;
+    d->defaultDelayTime = delay;
 }
 
-bool QGifImage::addFrame(const QImage &frame, int delayTime)
+/*!
+    Return the default transparent color.
+
+    The transparent color can be different for every frame.
+*/
+QColor QGifImage::defaultTransparentColor() const
+{
+    Q_D(const QGifImage);
+    return d->defaultTransparentColor;
+}
+
+/*!
+    Set the default transparent \a color.
+*/
+void QGifImage::setDefaultTransparentColor(const QColor &color)
+{
+    Q_D(QGifImage);
+    d->defaultTransparentColor = color;
+}
+
+void QGifImage::insertFrame(int index, const QImage &frame, int delay)
 {
     Q_D(QGifImage);
 
     FrameInfoData data;
-    data.delayTime = delayTime;
+    data.image = frame;
+    data.delayTime = delay;
     data.offset = frame.offset();
 
-    d->frames.append(frame);
-    d->frameInfos.append(data);
-    return true;
+    d->frameInfos.insert(index, data);
 }
 
+void QGifImage::insertFrame(int index, const QImage &frame, const QPoint &offset, int delay)
+{
+    Q_D(QGifImage);
+    FrameInfoData data;
+    data.image = frame;
+    data.delayTime = delay;
+    data.offset = offset;
+
+    d->frameInfos.insert(index, data);
+}
+
+void QGifImage::addFrame(const QImage &frame, int delay)
+{
+    Q_D(QGifImage);
+
+    FrameInfoData data;
+    data.image = frame;
+    data.delayTime = delay;
+    data.offset = frame.offset();
+
+    d->frameInfos.append(data);
+}
+
+
+void QGifImage::addFrame(const QImage &frame, const QPoint& offset, int delay)
+{
+    Q_D(QGifImage);
+
+    FrameInfoData data;
+    data.image = frame;
+    data.delayTime = delay;
+    data.offset = offset;
+
+    d->frameInfos.append(data);
+}
+
+/*!
+    Return frame count contained in the gif file.
+ */
 int QGifImage::frameCount() const
 {
     Q_D(const QGifImage);
-    return d->frames.count();
+    return d->frameInfos.count();
 }
 
-QList<QImage> QGifImage::frames() const
+/*!
+    Return the image at \a index.
+ */
+QImage QGifImage::frame(int index) const
 {
     Q_D(const QGifImage);
-    return d->frames;
+    if (index < 0 || index >= d->frameInfos.size())
+        return QImage();
+
+    return d->frameInfos[index].image;
+}
+
+QPoint QGifImage::frameOffset(int index) const
+{
+    Q_D(const QGifImage);
+    if (index < 0 || index >= d->frameInfos.size())
+        return QPoint();
+
+    return d->frameInfos[index].offset;
+}
+
+void QGifImage::setFrameOffset(int index, const QPoint &offset)
+{
+    Q_D(QGifImage);
+    if (index < 0 || index >= d->frameInfos.size())
+        return;
+    d->frameInfos[index].offset = offset;
+}
+
+int QGifImage::frameDelay(int index) const
+{
+    Q_D(const QGifImage);
+    if (index < 0 || index >= d->frameInfos.size())
+        return -1;
+
+    return d->frameInfos[index].delayTime;
+}
+
+void QGifImage::setFrameDelay(int index, int delay)
+{
+    Q_D(QGifImage);
+    if (index < 0 || index >= d->frameInfos.size())
+        return;
+    d->frameInfos[index].delayTime = delay;
+}
+
+QColor QGifImage::frameTransparentColor(int index) const
+{
+    Q_D(const QGifImage);
+    if (index < 0 || index >= d->frameInfos.size())
+        return QColor();
+
+    return d->frameInfos[index].transparentColor;
+}
+
+void QGifImage::setFrameTransparentColor(int index, const QColor &color)
+{
+    Q_D(QGifImage);
+    if (index < 0 || index >= d->frameInfos.size())
+        return;
+    d->frameInfos[index].transparentColor = color;
 }
 
 /*!
