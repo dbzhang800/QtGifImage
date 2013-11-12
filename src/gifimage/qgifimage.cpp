@@ -43,7 +43,7 @@ int readFromIODevice(GifFileType *gifFile, GifByteType *data, int maxSize)
 }
 
 QGifImagePrivate::QGifImagePrivate(QGifImage *p)
-    : defaultDelayTime(1000), q_ptr(p)
+    : loopCount(0), defaultDelayTime(1000), q_ptr(p)
 {
 
 }
@@ -103,13 +103,29 @@ QSize QGifImagePrivate::getCanvasSize() const
     //Calc the right canvasSize from the frame size.
     int width = -1;
     int height = -1;
-    foreach (FrameInfoData info, frameInfos) {
+    foreach (QGifFrameInfoData info, frameInfos) {
         int w = info.image.width() + info.offset.x();
         int h = info.image.height() + info.offset.y();
         if (w > width) width = w;
         if (h > height) height = h;
     }
     return QSize(width, height);
+}
+
+int QGifImagePrivate::getFrameTransparentColorIndex(const QGifFrameInfoData &frameInfo) const
+{
+    int index = -1;
+
+    QColor transColor = frameInfo.transparentColor.isValid() ? frameInfo.transparentColor : defaultTransparentColor;
+
+    if (transColor.isValid()) {
+        if (!frameInfo.image.colorTable().isEmpty())
+            index = frameInfo.image.colorTable().indexOf(transColor.rgb());
+        else if (!globalColorTable.isEmpty())
+            index = globalColorTable.indexOf(transColor.rgb());
+    }
+
+    return index;
 }
 
 bool QGifImagePrivate::load(QIODevice *device)
@@ -142,7 +158,7 @@ bool QGifImagePrivate::load(QIODevice *device)
         int width = gifImage.ImageDesc.Width;
         int height = gifImage.ImageDesc.Height;
 
-        FrameInfoData frameInfo;
+        QGifFrameInfoData frameInfo;
         GraphicsControlBlock gcb;
         DGifSavedExtensionToGCB(gifFile, idx, &gcb);
         int transColorIndex = gcb.TransparentColor;
@@ -184,11 +200,21 @@ bool QGifImagePrivate::load(QIODevice *device)
         }
 
         //Extract other data for the image.
-//        for (int i=0; i<gifImage->ExtensionBlockCount; ++i) {
-//            ExtensionBlock *extBlock = gifImage->ExtensionBlocks[i];
-//            if (extBlock->Function == GRAPHICS_EXT_FUNC_CODE) {
-//            }
-//        }
+        if (idx == 0) {
+            if (gifImage.ExtensionBlockCount > 2) {
+                ExtensionBlock *extBlock = gifImage.ExtensionBlocks;
+                if (extBlock->Function == APPLICATION_EXT_FUNC_CODE && extBlock->ByteCount == 8) {
+                    if (QByteArray((char *)extBlock->Bytes) == QByteArray("NETSCAPE2.0")) {
+                        ExtensionBlock *block = gifImage.ExtensionBlocks+1;
+                        if (block->ByteCount == 3) {
+                            loopCount = uchar(block->Bytes[1])
+                                    + uchar((block->Bytes[2])<<8);
+                        }
+                    }
+                }
+            }
+        }
+
         frameInfo.image = image;
         frameInfos.append(frameInfo);
     }
@@ -219,13 +245,13 @@ bool QGifImagePrivate::save(QIODevice *device) const
     gifFile->ImageCount = frameInfos.size();
     gifFile->SavedImages = (SavedImage *)calloc(frameInfos.size(), sizeof(SavedImage));
     for (int idx=0; idx < frameInfos.size(); ++idx) {
-        const FrameInfoData frameInfo = frameInfos.at(idx);
+        const QGifFrameInfoData frameInfo = frameInfos.at(idx);
         QImage image = frameInfo.image;
         if (image.format() != QImage::Format_Indexed8) {
-//            if (!globalColorTable.isEmpty())
-//                image = image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
-//            else
-            image = image.convertToFormat(QImage::Format_Indexed8);
+            if (!globalColorTable.isEmpty())
+                image = image.convertToFormat(QImage::Format_Indexed8, globalColorTable);
+            else
+                image = image.convertToFormat(QImage::Format_Indexed8);
         }
 
         SavedImage *gifImage = gifFile->SavedImages + idx;
@@ -247,17 +273,22 @@ bool QGifImagePrivate::save(QIODevice *device) const
         }
         gifImage->RasterBits = data;
 
+        if (idx == 0) {
+            uchar data8[12] = "NETSCAPE2.0";
+            GifAddExtensionBlock(&gifImage->ExtensionBlockCount, &gifImage->ExtensionBlocks
+                                 , APPLICATION_EXT_FUNC_CODE, 11, data8);
+            uchar data[3];
+            data[0] = 0x01;
+            data[1] = loopCount & 0xFF;
+            data[2] = (loopCount >> 8) & 0xFF;
+            GifAddExtensionBlock(&gifImage->ExtensionBlockCount, &gifImage->ExtensionBlocks
+                                 , CONTINUE_EXT_FUNC_CODE, 3, data);
+        }
+
         GraphicsControlBlock gcbBlock;
         gcbBlock.DisposalMode = 0;
         gcbBlock.UserInputFlag = false;
-        int index = -1;
-        if (frameInfo.transparentColor.isValid()) {
-            if (!image.colorTable().isEmpty())
-                index = image.colorTable().indexOf(frameInfo.transparentColor.rgba());
-            else if (!globalColorTable.isEmpty())
-                index = globalColorTable.indexOf(frameInfo.transparentColor.rgba());
-        }
-        gcbBlock.TransparentColor = index;
+        gcbBlock.TransparentColor = getFrameTransparentColorIndex(frameInfo);
 
         if (frameInfo.delayTime != -1)
             gcbBlock.DelayTime = frameInfo.delayTime / 10; //convert from milliseconds
@@ -337,7 +368,11 @@ QColor QGifImage::backgroundColor() const
 /*!
     Set the global color table \a colors and background color \a bgColor.
     \a bgColor must be one the color in \a colors.
- */
+
+    Unlike other image formats that support alpha (e.g. png), GIF does not
+    support semi-transparent pixels. So the alpha channel of the color table
+    will be ignored.
+*/
 void QGifImage::setGlobalColorTable(const QVector<QRgb> &colors, const QColor &bgColor)
 {
     Q_D(QGifImage);
@@ -378,6 +413,12 @@ QColor QGifImage::defaultTransparentColor() const
 
 /*!
     Set the default transparent \a color.
+
+    Unlike other image formats that support alpha (e.g. png), GIF does
+    not support semi-transparent pixels. The way to achieve transparency
+    is to set a color that will be transparent when rendering the GIF.
+    So, if you set the transparent color to black, the black pixels in
+    the gif file will be transparent.
 */
 void QGifImage::setDefaultTransparentColor(const QColor &color)
 {
@@ -385,11 +426,23 @@ void QGifImage::setDefaultTransparentColor(const QColor &color)
     d->defaultTransparentColor = color;
 }
 
+int QGifImage::loopCount() const
+{
+    Q_D(const QGifImage);
+    return d->loopCount;
+}
+
+void QGifImage::setLoopCount(int loop)
+{
+    Q_D(QGifImage);
+    d->loopCount = loop;
+}
+
 void QGifImage::insertFrame(int index, const QImage &frame, int delay)
 {
     Q_D(QGifImage);
 
-    FrameInfoData data;
+    QGifFrameInfoData data;
     data.image = frame;
     data.delayTime = delay;
     data.offset = frame.offset();
@@ -400,7 +453,7 @@ void QGifImage::insertFrame(int index, const QImage &frame, int delay)
 void QGifImage::insertFrame(int index, const QImage &frame, const QPoint &offset, int delay)
 {
     Q_D(QGifImage);
-    FrameInfoData data;
+    QGifFrameInfoData data;
     data.image = frame;
     data.delayTime = delay;
     data.offset = offset;
@@ -412,7 +465,7 @@ void QGifImage::addFrame(const QImage &frame, int delay)
 {
     Q_D(QGifImage);
 
-    FrameInfoData data;
+    QGifFrameInfoData data;
     data.image = frame;
     data.delayTime = delay;
     data.offset = frame.offset();
@@ -425,7 +478,7 @@ void QGifImage::addFrame(const QImage &frame, const QPoint& offset, int delay)
 {
     Q_D(QGifImage);
 
-    FrameInfoData data;
+    QGifFrameInfoData data;
     data.image = frame;
     data.delayTime = delay;
     data.offset = offset;
@@ -497,6 +550,13 @@ QColor QGifImage::frameTransparentColor(int index) const
     return d->frameInfos[index].transparentColor;
 }
 
+/*!
+    Sets the transparent color of the frame \a index. Unlike other image formats
+    that support alpha (e.g. PNG), GIF does not support semi-transparent pixels.
+    The way to achieve transparency is to set a color that will be transparent
+    when rendering the GIF. So, if you set the transparent color to black, the
+    black pixels in your gif file will be transparent.
+*/
 void QGifImage::setFrameTransparentColor(int index, const QColor &color)
 {
     Q_D(QGifImage);

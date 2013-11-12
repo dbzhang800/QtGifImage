@@ -31,10 +31,10 @@
 #include <QVector>
 #include <QColor>
 
-class FrameInfoData
+class QGifFrameInfoData
 {
 public:
-    FrameInfoData()
+    QGifFrameInfoData()
         :delayTime(-1), interlace(false)
     {
 
@@ -57,14 +57,16 @@ public:
     QVector<QRgb> colorTableFromColorMapObject(ColorMapObject *object, int transColorIndex=-1) const;
     ColorMapObject * colorTableToColorMapObject(QVector<QRgb> colorTable) const;
     QSize getCanvasSize() const;
+    int getFrameTransparentColorIndex(const QGifFrameInfoData &info) const;
 
     QSize canvasSize;
+    int loopCount;
     int defaultDelayTime;
     QColor defaultTransparentColor;
 
     QVector<QRgb> globalColorTable;
     QColor bgColor;
-    QList<FrameInfoData> frameInfos;
+    QList<QGifFrameInfoData> frameInfos;
 
     QGifImage *q_ptr;
 };
