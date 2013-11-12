@@ -37,7 +37,6 @@ class Q_GIFIMAGE_EXPORT QGifImage
     Q_DECLARE_PRIVATE(QGifImage)
 public:
     QGifImage();
-    QGifImage(QIODevice *device);
     QGifImage(const QString &fileName);
     QGifImage(const QSize &size);
     ~QGifImage();

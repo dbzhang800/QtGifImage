@@ -307,6 +307,7 @@ bool QGifImagePrivate::save(QIODevice *device) const
 
 /*!
     \class QGifImage
+    \inmodule QtGifImage
     \brief Class used to read/wirte .gif files.
 */
 
@@ -330,7 +331,7 @@ QGifImage::QGifImage(const QString &fileName)
 }
 
 /*!
-    Constructs a gif image
+    Constructs a gif image with the given \a size
 */
 QGifImage::QGifImage(const QSize &size)
     :d_ptr(new QGifImagePrivate(this))
@@ -426,18 +427,33 @@ void QGifImage::setDefaultTransparentColor(const QColor &color)
     d->defaultTransparentColor = color;
 }
 
+/*!
+    Return the loop count.
+*/
 int QGifImage::loopCount() const
 {
     Q_D(const QGifImage);
     return d->loopCount;
 }
 
+/*!
+    Set the loop count. The default value of \a loop is 0, which means loop forever.
+*/
 void QGifImage::setLoopCount(int loop)
 {
     Q_D(QGifImage);
     d->loopCount = loop;
 }
 
+/*!
+    Insert the QImage object \a frame at position \a index with \a delay.
+
+    As gif file only support indexed image, so all the \a frame will be converted
+    to the QImage::Format_Indexed8 format. Global color table will be used in the
+    convertion if it has been set.
+
+    QImage::offset() will be used when insert the QImage to the gif canvas.
+*/
 void QGifImage::insertFrame(int index, const QImage &frame, int delay)
 {
     Q_D(QGifImage);
@@ -450,6 +466,16 @@ void QGifImage::insertFrame(int index, const QImage &frame, int delay)
     d->frameInfos.insert(index, data);
 }
 
+/*!
+    \overload
+
+    Insert the QImage object \a frame at position \a index with the given \a offset and
+    \a delay.
+
+    As gif file only support indexed image, so all the \a frame will be converted
+    to the QImage::Format_Indexed8 format. Global color table will be used in the
+    convertion if it has been set.
+*/
 void QGifImage::insertFrame(int index, const QImage &frame, const QPoint &offset, int delay)
 {
     Q_D(QGifImage);
@@ -461,6 +487,15 @@ void QGifImage::insertFrame(int index, const QImage &frame, const QPoint &offset
     d->frameInfos.insert(index, data);
 }
 
+/*!
+    Append the QImage object \a frame with \a delay.
+
+    As gif file only support indexed image, so all the \a frame will be converted
+    to the QImage::Format_Indexed8 format. Global color table will be used in the
+    convertion if it has been set.
+
+    QImage::offset() will be used when insert the QImage to the gif canvas.
+*/
 void QGifImage::addFrame(const QImage &frame, int delay)
 {
     Q_D(QGifImage);
@@ -473,7 +508,10 @@ void QGifImage::addFrame(const QImage &frame, int delay)
     d->frameInfos.append(data);
 }
 
-
+/*!
+    \overload
+    Append the QImage object \a frame with the given \a offset and \a delay.
+ */
 void QGifImage::addFrame(const QImage &frame, const QPoint& offset, int delay)
 {
     Q_D(QGifImage);
@@ -507,6 +545,9 @@ QImage QGifImage::frame(int index) const
     return d->frameInfos[index].image;
 }
 
+/*!
+     Return the offset value of the frame at \a index
+ */
 QPoint QGifImage::frameOffset(int index) const
 {
     Q_D(const QGifImage);
@@ -516,6 +557,9 @@ QPoint QGifImage::frameOffset(int index) const
     return d->frameInfos[index].offset;
 }
 
+/*!
+     Set the \a offset value for the frame at \a index
+ */
 void QGifImage::setFrameOffset(int index, const QPoint &offset)
 {
     Q_D(QGifImage);
@@ -524,6 +568,9 @@ void QGifImage::setFrameOffset(int index, const QPoint &offset)
     d->frameInfos[index].offset = offset;
 }
 
+/*!
+     Return the delay value of the frame at \a index
+ */
 int QGifImage::frameDelay(int index) const
 {
     Q_D(const QGifImage);
@@ -533,6 +580,9 @@ int QGifImage::frameDelay(int index) const
     return d->frameInfos[index].delayTime;
 }
 
+/*!
+     Set the \a delay value for the frame at \a index
+ */
 void QGifImage::setFrameDelay(int index, int delay)
 {
     Q_D(QGifImage);
@@ -541,6 +591,9 @@ void QGifImage::setFrameDelay(int index, int delay)
     d->frameInfos[index].delayTime = delay;
 }
 
+/*!
+     Return the transparent color of the frame at \a index
+ */
 QColor QGifImage::frameTransparentColor(int index) const
 {
     Q_D(const QGifImage);
@@ -551,7 +604,7 @@ QColor QGifImage::frameTransparentColor(int index) const
 }
 
 /*!
-    Sets the transparent color of the frame \a index. Unlike other image formats
+    Sets the transparent \a color of the frame \a index. Unlike other image formats
     that support alpha (e.g. PNG), GIF does not support semi-transparent pixels.
     The way to achieve transparency is to set a color that will be transparent
     when rendering the GIF. So, if you set the transparent color to black, the

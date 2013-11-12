@@ -1,3 +1,5 @@
+Documentation: http://qtgifimage.debao.me
+
 Qt Gif Image is a Qt library that can read and write Gif files.
  
 ## Getting Started

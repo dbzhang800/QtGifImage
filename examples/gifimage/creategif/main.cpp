@@ -38,8 +38,9 @@ int main(int argc, char **argv)
         gif.addFrame(image, QPoint(i*20, i*20));
     }
     //![2]
-
-    gif.save(SRCDIR"test.gif");
+    //![3]
+    gif.save(SRCDIR"demo1.gif");
+    //![3]
 
     return 0;
 }

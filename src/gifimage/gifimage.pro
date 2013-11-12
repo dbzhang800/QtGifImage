@@ -1,6 +1,6 @@
 TARGET = QtGifImage
 
-#QMAKE_DOCS = $$PWD/doc/qtgifimage.qdocconf
+QMAKE_DOCS = $$PWD/doc/qtgifimage.qdocconf
 
 load(qt_module)
 
