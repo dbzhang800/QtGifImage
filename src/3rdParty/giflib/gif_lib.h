@@ -19,7 +19,16 @@ extern "C" {
 #define GIF_OK      1
 
 #include <stddef.h>
+#ifdef _MSC_VER
+#define BOOL int
+#define TRUE 1
+#define FALSE 0
+#else
 #include <stdbool.h>
+#define BOOL _Bool
+#define TRUE 1
+#define FALSE 0
+#endif
 
 #define GIF_STAMP "GIFVER"          /* First chars in file - GIF stamp.  */
 #define GIF_STAMP_LEN sizeof(GIF_STAMP) - 1
@@ -40,13 +49,13 @@ typedef struct GifColorType {
 typedef struct ColorMapObject {
     int ColorCount;
     int BitsPerPixel;
-    bool SortFlag;
+    BOOL SortFlag;
     GifColorType *Colors;    /* on malloc(3) heap */
 } ColorMapObject;
 
 typedef struct GifImageDesc {
     GifWord Left, Top, Width, Height;   /* Current image dimensions. */
-    bool Interlace;                     /* Sequential/Interlaced lines. */
+    BOOL Interlace;                     /* Sequential/Interlaced lines. */
     ColorMapObject *ColorMap;           /* The local color map */
 } GifImageDesc;
 
@@ -112,7 +121,7 @@ typedef struct GraphicsControlBlock {
 #define DISPOSE_DO_NOT            1       /* Leave image in place */
 #define DISPOSE_BACKGROUND        2       /* Set area too background color */
 #define DISPOSE_PREVIOUS          3       /* Restore to previous content */
-    bool UserInputFlag;      /* User confirmation required before disposal */
+    BOOL UserInputFlag;      /* User confirmation required before disposal */
     int DelayTime;           /* pre-display delay in 0.01sec units */
     int TransparentColor;    /* Palette index for transparency, -1 if none */
 #define NO_TRANSPARENT_COLOR	-1
@@ -124,7 +133,7 @@ typedef struct GraphicsControlBlock {
 
 /* Main entry points */
 GifFileType *EGifOpenFileName(const char *GifFileName,
-                              const bool GifTestExistence, int *Error);
+                              const BOOL GifTestExistence, int *Error);
 GifFileType *EGifOpenFileHandle(const int GifFileHandle, int *Error);
 GifFileType *EGifOpen(void *userPtr, OutputFunc writeFunc, int *Error);
 int EGifSpew(GifFileType * GifFile);
@@ -151,9 +160,9 @@ int EGifPutScreenDesc(GifFileType *GifFile,
 int EGifPutImageDesc(GifFileType *GifFile, 
 		     const int GifLeft, const int GifTop,
                      const int GifWidth, const int GifHeight, 
-		     const bool GifInterlace,
+             const BOOL GifInterlace,
                      const ColorMapObject *GifColorMap);
-void EGifSetGifVersion(GifFileType *GifFile, const bool gif89);
+void EGifSetGifVersion(GifFileType *GifFile, const BOOL gif89);
 int EGifPutLine(GifFileType *GifFile, GifPixelType *GifLine,
                 int GifLineLen);
 int EGifPutPixel(GifFileType *GifFile, const GifPixelType GifPixel);

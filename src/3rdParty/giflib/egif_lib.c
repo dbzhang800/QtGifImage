@@ -51,7 +51,7 @@ static int EGifBufferedOutput(GifFileType * GifFile, GifByteType * Buf,
  info record. The Error member is cleared if successful.
 ******************************************************************************/
 GifFileType *
-EGifOpenFileName(const char *FileName, const bool TestExistence, int *Error)
+EGifOpenFileName(const char *FileName, const BOOL TestExistence, int *Error)
 {
 
     int FileHandle;
@@ -174,7 +174,7 @@ EGifOpen(void *userData, OutputFunc writeFunc, int *Error)
     Private->Write = writeFunc;    /* User write routine (MRB) */
     GifFile->UserData = userData;    /* User write handle (MRB) */
 
-    Private->gif89 = false;	/* initially, write GIF87 */
+    Private->gif89 = FALSE;	/* initially, write GIF87 */
 
     GifFile->Error = 0;
 
@@ -205,7 +205,7 @@ EGifGetGifVersion(GifFileType *GifFile)
                 || function == GRAPHICS_EXT_FUNC_CODE
                 || function == PLAINTEXT_EXT_FUNC_CODE
                 || function == APPLICATION_EXT_FUNC_CODE)
-                Private->gif89 = true;
+                Private->gif89 = TRUE;
         }
     }
     for (i = 0; i < GifFile->ExtensionBlockCount; i++) {
@@ -215,7 +215,7 @@ EGifGetGifVersion(GifFileType *GifFile)
 	    || function == GRAPHICS_EXT_FUNC_CODE
 	    || function == PLAINTEXT_EXT_FUNC_CODE
 	    || function == APPLICATION_EXT_FUNC_CODE)
-	    Private->gif89 = true;
+        Private->gif89 = TRUE;
     }
  
     if (Private->gif89)
@@ -231,7 +231,7 @@ EGifGetGifVersion(GifFileType *GifFile)
  is 1 (numerically the same as bool true).  That way we'll even preserve
  object-file compatibility!
 ******************************************************************************/
-void EGifSetGifVersion(GifFileType *GifFile, const bool gif89)
+void EGifSetGifVersion(GifFileType *GifFile, const BOOL gif89)
 {
     GifFilePrivateType *Private = (GifFilePrivateType *) GifFile->Private;
 
@@ -354,7 +354,7 @@ EGifPutImageDesc(GifFileType *GifFile,
                  const int Top,
                  const int Width,
                  const int Height,
-                 const bool Interlace,
+                 const BOOL Interlace,
                  const ColorMapObject *ColorMap)
 {
     GifByteType Buf[3];
