@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en_US" lang="en_US">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qgifimage.cpp -->
+  <title>QGifImage Class | QtGifImage 0.1</title>
+  <link rel="stylesheet" type="text/css" href="style/offline.css" />
+</head>
+<body>
+<div class="header" id="qtdocheader">
+    <div class="main">
+    <div class="main-rounded">
+        <div class="navigationbar">
+        <ul>
+<li>Qt 0.1</li>
+<li>QGifImage</li>
+<li id="buildversion">
+Qt 0.1.0 Reference Documentation</li>
+    </ul>
+    </div>
+</div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<h1 class="title">QGifImage Class</h1>
+<!-- $$$QGifImage-brief -->
+<p>Class used to read/wirte .gif files. <a href="#details">More...</a></p>
+<!-- @@@QGifImage -->
+<table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> </b><tt><span class="preprocessor">#include &lt;QGifImage&gt;</span>
+</tt></td></tr></table><ul>
+<li><a href="qgifimage-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2>Public Functions</h2>
+<table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#QGifImage">QGifImage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#QGifImage-2">QGifImage</a></b>(QIODevice *<i> device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#QGifImage-3">QGifImage</a></b>(const QString &amp;<i> fileName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#QGifImage-4">QGifImage</a></b>(const QSize &amp;<i> size</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#dtor.QGifImage">~QGifImage</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#addFrame">addFrame</a></b>(const QImage &amp;<i> frame</i>, int<i> delay</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#addFrame-2">addFrame</a></b>(const QImage &amp;<i> frame</i>, const QPoint &amp;<i> offset</i>, int<i> delay</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#backgroundColor">backgroundColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#defaultDelay">defaultDelay</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#defaultTransparentColor">defaultTransparentColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QImage </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#frame">frame</a></b>(int<i> index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#frameCount">frameCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#frameDelay">frameDelay</a></b>(int<i> index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QPoint </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#frameOffset">frameOffset</a></b>(int<i> index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QColor </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#frameTransparentColor">frameTransparentColor</a></b>(int<i> index</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QVector&lt;QRgb&gt; </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#globalColorTable">globalColorTable</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#insertFrame">insertFrame</a></b>(int<i> index</i>, const QImage &amp;<i> frame</i>, int<i> delay</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#insertFrame-2">insertFrame</a></b>(int<i> index</i>, const QImage &amp;<i> frame</i>, const QPoint &amp;<i> offset</i>, int<i> delay</i> = -1)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#load">load</a></b>(const QString &amp;<i> fileName</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#load-2">load</a></b>(QIODevice *<i> device</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#loopCount">loopCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#save">save</a></b>(const QString &amp;<i> fileName</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#save-2">save</a></b>(QIODevice *<i> device</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setDefaultDelay">setDefaultDelay</a></b>(int<i> delay</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setDefaultTransparentColor">setDefaultTransparentColor</a></b>(const QColor &amp;<i> color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setFrameDelay">setFrameDelay</a></b>(int<i> index</i>, int<i> delay</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setFrameOffset">setFrameOffset</a></b>(int<i> index</i>, const QPoint &amp;<i> offset</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setFrameTransparentColor">setFrameTransparentColor</a></b>(int<i> index</i>, const QColor &amp;<i> color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setGlobalColorTable">setGlobalColorTable</a></b>(const QVector&lt;QRgb&gt; &amp;<i> colors</i>, const QColor &amp;<i> bgColor</i> = QColor())</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qgifimage.html#setLoopCount">setLoopCount</a></b>(int<i> loop</i>)</td></tr>
+</table>
+<a name="details"></a>
+<!-- $$$QGifImage-description -->
+<div class="descr">
+<h2>Detailed Description</h2>
+<p>Class used to read/wirte .gif files.</p>
+</div>
+<!-- @@@QGifImage -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QGifImage[overload1]$$$QGifImage -->
+<h3 class="fn"><a name="QGifImage"></a>QGifImage::<span class="name">QGifImage</span>()</h3>
+<p>Constructs a gif image</p>
+<!-- @@@QGifImage -->
+<!-- $$$QGifImage$$$QGifImageQIODevice* -->
+<h3 class="fn"><a name="QGifImage-2"></a>QGifImage::<span class="name">QGifImage</span>(<span class="type">QIODevice</span> *<i> device</i>)</h3>
+<!-- @@@QGifImage -->
+<!-- $$$QGifImage$$$QGifImageconstQString& -->
+<h3 class="fn"><a name="QGifImage-3"></a>QGifImage::<span class="name">QGifImage</span>(const <span class="type">QString</span> &amp;<i> fileName</i>)</h3>
+<p>Constructs a gif image and tries to load the image from the file with the given <i>fileName</i></p>
+<!-- @@@QGifImage -->
+<!-- $$$QGifImage$$$QGifImageconstQSize& -->
+<h3 class="fn"><a name="QGifImage-4"></a>QGifImage::<span class="name">QGifImage</span>(const <span class="type">QSize</span> &amp;<i> size</i>)</h3>
+<p>Constructs a gif image</p>
+<!-- @@@QGifImage -->
+<!-- $$$~QGifImage[overload1]$$$~QGifImage -->
+<h3 class="fn"><a name="dtor.QGifImage"></a>QGifImage::<span class="name">~QGifImage</span>()</h3>
+<p>Destroys the gif image and cleans up.</p>
+<!-- @@@~QGifImage -->
+<!-- $$$addFrame[overload1]$$$addFrameconstQImage&int -->
+<h3 class="fn"><a name="addFrame"></a><span class="type">void</span> QGifImage::<span class="name">addFrame</span>(const <span class="type">QImage</span> &amp;<i> frame</i>, <span class="type">int</span><i> delay</i> = -1)</h3>
+<!-- @@@addFrame -->
+<!-- $$$addFrame$$$addFrameconstQImage&constQPoint&int -->
+<h3 class="fn"><a name="addFrame-2"></a><span class="type">void</span> QGifImage::<span class="name">addFrame</span>(const <span class="type">QImage</span> &amp;<i> frame</i>, const <span class="type">QPoint</span> &amp;<i> offset</i>, <span class="type">int</span><i> delay</i> = -1)</h3>
+<!-- @@@addFrame -->
+<!-- $$$backgroundColor[overload1]$$$backgroundColor -->
+<h3 class="fn"><a name="backgroundColor"></a><span class="type">QColor</span> QGifImage::<span class="name">backgroundColor</span>() const</h3>
+<p>Return background color of the gif canvas. It only makes sense when global color table is not empty.</p>
+<!-- @@@backgroundColor -->
+<!-- $$$defaultDelay[overload1]$$$defaultDelay -->
+<h3 class="fn"><a name="defaultDelay"></a><span class="type">int</span> QGifImage::<span class="name">defaultDelay</span>() const</h3>
+<p>Return the default delay in milliseconds. The default value is 1000 ms.</p>
+<p>The time delay can be different for every frame.</p>
+<p><b>See also </b><a href="qgifimage.html#setDefaultDelay">setDefaultDelay</a>().</p>
+<!-- @@@defaultDelay -->
+<!-- $$$defaultTransparentColor[overload1]$$$defaultTransparentColor -->
+<h3 class="fn"><a name="defaultTransparentColor"></a><span class="type">QColor</span> QGifImage::<span class="name">defaultTransparentColor</span>() const</h3>
+<p>Return the default transparent color.</p>
+<p>The transparent color can be different for every frame.</p>
+<p><b>See also </b><a href="qgifimage.html#setDefaultTransparentColor">setDefaultTransparentColor</a>().</p>
+<!-- @@@defaultTransparentColor -->
+<!-- $$$frame[overload1]$$$frameint -->
+<h3 class="fn"><a name="frame"></a><span class="type">QImage</span> QGifImage::<span class="name">frame</span>(<span class="type">int</span><i> index</i>) const</h3>
+<p>Return the image at <i>index</i>.</p>
+<!-- @@@frame -->
+<!-- $$$frameCount[overload1]$$$frameCount -->
+<h3 class="fn"><a name="frameCount"></a><span class="type">int</span> QGifImage::<span class="name">frameCount</span>() const</h3>
+<p>Return frame count contained in the gif file.</p>
+<!-- @@@frameCount -->
+<!-- $$$frameDelay[overload1]$$$frameDelayint -->
+<h3 class="fn"><a name="frameDelay"></a><span class="type">int</span> QGifImage::<span class="name">frameDelay</span>(<span class="type">int</span><i> index</i>) const</h3>
+<p><b>See also </b><a href="qgifimage.html#setFrameDelay">setFrameDelay</a>().</p>
+<!-- @@@frameDelay -->
+<!-- $$$frameOffset[overload1]$$$frameOffsetint -->
+<h3 class="fn"><a name="frameOffset"></a><span class="type">QPoint</span> QGifImage::<span class="name">frameOffset</span>(<span class="type">int</span><i> index</i>) const</h3>
+<p><b>See also </b><a href="qgifimage.html#setFrameOffset">setFrameOffset</a>().</p>
+<!-- @@@frameOffset -->
+<!-- $$$frameTransparentColor[overload1]$$$frameTransparentColorint -->
+<h3 class="fn"><a name="frameTransparentColor"></a><span class="type">QColor</span> QGifImage::<span class="name">frameTransparentColor</span>(<span class="type">int</span><i> index</i>) const</h3>
+<p><b>See also </b><a href="qgifimage.html#setFrameTransparentColor">setFrameTransparentColor</a>().</p>
+<!-- @@@frameTransparentColor -->
+<!-- $$$globalColorTable[overload1]$$$globalColorTable -->
+<h3 class="fn"><a name="globalColorTable"></a><span class="type">QVector</span>&lt;<span class="type">QRgb</span>&gt; QGifImage::<span class="name">globalColorTable</span>() const</h3>
+<p>Return global color table.</p>
+<p><b>See also </b><a href="qgifimage.html#setGlobalColorTable">setGlobalColorTable</a>().</p>
+<!-- @@@globalColorTable -->
+<!-- $$$insertFrame[overload1]$$$insertFrameintconstQImage&int -->
+<h3 class="fn"><a name="insertFrame"></a><span class="type">void</span> QGifImage::<span class="name">insertFrame</span>(<span class="type">int</span><i> index</i>, const <span class="type">QImage</span> &amp;<i> frame</i>, <span class="type">int</span><i> delay</i> = -1)</h3>
+<!-- @@@insertFrame -->
+<!-- $$$insertFrame$$$insertFrameintconstQImage&constQPoint&int -->
+<h3 class="fn"><a name="insertFrame-2"></a><span class="type">void</span> QGifImage::<span class="name">insertFrame</span>(<span class="type">int</span><i> index</i>, const <span class="type">QImage</span> &amp;<i> frame</i>, const <span class="type">QPoint</span> &amp;<i> offset</i>, <span class="type">int</span><i> delay</i> = -1)</h3>
+<!-- @@@insertFrame -->
+<!-- $$$load[overload1]$$$loadconstQString& -->
+<h3 class="fn"><a name="load"></a><span class="type">bool</span> QGifImage::<span class="name">load</span>(const <span class="type">QString</span> &amp;<i> fileName</i>)</h3>
+<p>Loads an gif image from the file with the given <i>fileName</i>. Returns <tt>true</tt> if the image was successfully loaded; otherwise invalidates the image and returns <tt>false</tt>.</p>
+<!-- @@@load -->
+<!-- $$$load$$$loadQIODevice* -->
+<h3 class="fn"><a name="load-2"></a><span class="type">bool</span> QGifImage::<span class="name">load</span>(<span class="type">QIODevice</span> *<i> device</i>)</h3>
+<p>This is an overloaded function.</p>
+<p>This function reads a gif image from the given <i>device</i>. This can, for example, be used to load an image directly into a QByteArray.</p>
+<!-- @@@load -->
+<!-- $$$loopCount[overload1]$$$loopCount -->
+<h3 class="fn"><a name="loopCount"></a><span class="type">int</span> QGifImage::<span class="name">loopCount</span>() const</h3>
+<p><b>See also </b><a href="qgifimage.html#setLoopCount">setLoopCount</a>().</p>
+<!-- @@@loopCount -->
+<!-- $$$save[overload1]$$$saveconstQString& -->
+<h3 class="fn"><a name="save"></a><span class="type">bool</span> QGifImage::<span class="name">save</span>(const <span class="type">QString</span> &amp;<i> fileName</i>) const</h3>
+<p>Saves the gif image to the file with the given <i>fileName</i>. Returns <tt>true</tt> if the image was successfully saved; otherwise returns <tt>false</tt>.</p>
+<!-- @@@save -->
+<!-- $$$save$$$saveQIODevice* -->
+<h3 class="fn"><a name="save-2"></a><span class="type">bool</span> QGifImage::<span class="name">save</span>(<span class="type">QIODevice</span> *<i> device</i>) const</h3>
+<p>This is an overloaded function.</p>
+<p>This function writes a QImage to the given <i>device</i>.</p>
+<!-- @@@save -->
+<!-- $$$setDefaultDelay[overload1]$$$setDefaultDelayint -->
+<h3 class="fn"><a name="setDefaultDelay"></a><span class="type">void</span> QGifImage::<span class="name">setDefaultDelay</span>(<span class="type">int</span><i> delay</i>)</h3>
+<p>Set the default <i>delay</i> in milliseconds.</p>
+<p><b>See also </b><a href="qgifimage.html#defaultDelay">defaultDelay</a>().</p>
+<!-- @@@setDefaultDelay -->
+<!-- $$$setDefaultTransparentColor[overload1]$$$setDefaultTransparentColorconstQColor& -->
+<h3 class="fn"><a name="setDefaultTransparentColor"></a><span class="type">void</span> QGifImage::<span class="name">setDefaultTransparentColor</span>(const <span class="type">QColor</span> &amp;<i> color</i>)</h3>
+<p>Set the default transparent <i>color</i>.</p>
+<p>Unlike other image formats that support alpha (e.g&#x2e; png), GIF does not support semi-transparent pixels. The way to achieve transparency is to set a color that will be transparent when rendering the GIF. So, if you set the transparent color to black, the black pixels in the gif file will be transparent.</p>
+<p><b>See also </b><a href="qgifimage.html#defaultTransparentColor">defaultTransparentColor</a>().</p>
+<!-- @@@setDefaultTransparentColor -->
+<!-- $$$setFrameDelay[overload1]$$$setFrameDelayintint -->
+<h3 class="fn"><a name="setFrameDelay"></a><span class="type">void</span> QGifImage::<span class="name">setFrameDelay</span>(<span class="type">int</span><i> index</i>, <span class="type">int</span><i> delay</i>)</h3>
+<p><b>See also </b><a href="qgifimage.html#frameDelay">frameDelay</a>().</p>
+<!-- @@@setFrameDelay -->
+<!-- $$$setFrameOffset[overload1]$$$setFrameOffsetintconstQPoint& -->
+<h3 class="fn"><a name="setFrameOffset"></a><span class="type">void</span> QGifImage::<span class="name">setFrameOffset</span>(<span class="type">int</span><i> index</i>, const <span class="type">QPoint</span> &amp;<i> offset</i>)</h3>
+<p><b>See also </b><a href="qgifimage.html#frameOffset">frameOffset</a>().</p>
+<!-- @@@setFrameOffset -->
+<!-- $$$setFrameTransparentColor[overload1]$$$setFrameTransparentColorintconstQColor& -->
+<h3 class="fn"><a name="setFrameTransparentColor"></a><span class="type">void</span> QGifImage::<span class="name">setFrameTransparentColor</span>(<span class="type">int</span><i> index</i>, const <span class="type">QColor</span> &amp;<i> color</i>)</h3>
+<p>Sets the transparent color of the frame <i>index</i>. Unlike other image formats that support alpha (e.g&#x2e; PNG), GIF does not support semi-transparent pixels. The way to achieve transparency is to set a color that will be transparent when rendering the GIF. So, if you set the transparent color to black, the black pixels in your gif file will be transparent.</p>
+<p><b>See also </b><a href="qgifimage.html#frameTransparentColor">frameTransparentColor</a>().</p>
+<!-- @@@setFrameTransparentColor -->
+<!-- $$$setGlobalColorTable[overload1]$$$setGlobalColorTableconstQVector<QRgb>&constQColor& -->
+<h3 class="fn"><a name="setGlobalColorTable"></a><span class="type">void</span> QGifImage::<span class="name">setGlobalColorTable</span>(const <span class="type">QVector</span>&lt;<span class="type">QRgb</span>&gt; &amp;<i> colors</i>, const <span class="type">QColor</span> &amp;<i> bgColor</i> = QColor())</h3>
+<p>Set the global color table <i>colors</i> and background color <i>bgColor</i>. <i>bgColor</i> must be one the color in <i>colors</i>.</p>
+<p>Unlike other image formats that support alpha (e.g&#x2e; png), GIF does not support semi-transparent pixels. So the alpha channel of the color table will be ignored.</p>
+<p><b>See also </b><a href="qgifimage.html#globalColorTable">globalColorTable</a>().</p>
+<!-- @@@setGlobalColorTable -->
+<!-- $$$setLoopCount[overload1]$$$setLoopCountint -->
+<h3 class="fn"><a name="setLoopCount"></a><span class="type">void</span> QGifImage::<span class="name">setLoopCount</span>(<span class="type">int</span><i> loop</i>)</h3>
+<p><b>See also </b><a href="qgifimage.html#loopCount">loopCount</a>().</p>
+<!-- @@@setLoopCount -->
+</div>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+        <div class="qt13a-copyright" id="copyright">
+            <div class="qt13a-container">
+            <p>
+              <acronym title="Copyright">&copy;</acronym> 2013 Debao Zhang. 
+              Documentation contributions included herein are the copyrights of
+              their respective owners.</p>
+            <p>
+              The documentation provided herein is licensed under the terms of the
+              <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation
+              License version 1.3</a> as published by the Free Software Foundation.</p>
+            <p>
+              Documentation sources may be obtained from <a href="https://github.com/dbzhang800/QtGifImage">
+              github.com/dbzhang800</a>.</p>
+            <p>
+              Qt and their respective logos are trademarks of Digia Plc 
+              in Finland and/or other countries worldwide. All other trademarks are property
+              of their respective owners. <a title="Privacy Policy"
+              href="http://en.gitorious.org/privacy_policy/">Privacy Policy</a></p>
+            </div>
+        </div>
+</div>
+</body>
+</html>
