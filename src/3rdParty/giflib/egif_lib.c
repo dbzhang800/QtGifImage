@@ -8,7 +8,6 @@ two modules will be linked.  Preserve this property!
 
 *****************************************************************************/
 
-#include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,6 +18,7 @@ two modules will be linked.  Preserve this property!
 #include <io.h>
 #else
 #include <sys/types.h>
+#include <unistd.h>
 #endif /* _WIN32 */
 #include <sys/stat.h>
 

@@ -12,12 +12,13 @@ two modules will be linked.  Preserve this property!
 #include <limits.h>
 #include <stdint.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 
 #ifdef _WIN32
 #include <io.h>
+#else
+#include <unistd.h>
 #endif /* _WIN32 */
 
 #include "gif_lib.h"
